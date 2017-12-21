@@ -147,8 +147,7 @@ implements EmailContact, ITicketUser {
         if ($collab->save(true))
             return $collab;
 
-        $errors['err'] = __('Unable to add collaborator.')
-            .' '.__('Internal error occurred');
+        $errors['err'] = __('Unable to add collaborator. Internal error');
 
         return false;
     }

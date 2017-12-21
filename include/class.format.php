@@ -512,128 +512,74 @@ class Format {
         global $cfg;
         static $cache;
 
-        if ($timestamp && $fromDb)
+        if (!$timestamp)
+            return '';
+
+        if ($fromDb)
             $timestamp = Misc::db2gmtime($timestamp);
 
-        // Make sure timestamp is valid for realz.
-        if (!$timestamp || !($datetime = DateTime::createFromFormat('U', $timestamp)))
-            return '';
-
-        // Set the desired timezone (caching since it will be mostly same
-        // for most date formatting.
-        if (isset($cache[$timezone]))
-            $tz =  $cache[$timezone];
-        else
-            $cache[$timezone] = $tz = new DateTimeZone($timezone ?: $cfg->getTimezone());
-        $datetime->setTimezone($tz);
-
-        // Formmating options
-        $options = array(
-                'timezone' => $tz->getName(),
-                'locale' =>  Internationalization::getCurrentLocale($user),
-                'daytype' => $dayType,
-                'timetype' => $timeType,
-                'strftime' => $strftimeFallback,
-                );
-
-        return self::IntDateFormat($datetime, $format, $options);
-
-    }
-
-    // IntDateFormat
-    // Format datetime to desired format in accorrding to desired locale
-    function IntDateFormat(DateTime $datetime, $format, $options=array()) {
-        global $cfg;
-
-        if (!$datetime instanceof DateTime)
-            return '';
-
-        $format = $format ?: $cfg->getDateFormat();
-        $timezone = $datetime->getTimeZone();
-        // Use IntlDateFormatter if available
         if (class_exists('IntlDateFormatter')) {
-
-            if ($cfg && $cfg->isForce24HourTime())
-                $format = str_replace(array('a', 'h'), array('', 'H'),
-                        $format);
-
-            $options += array(
-                    'pattern' => $format,
-                    'timezone' => $timezone->getName());
-
-            if ($fmt=Internationalization::getIntDateFormatter($options))
-                return  $fmt->format($datetime);
+            $locale = Internationalization::getCurrentLocale($user);
+            $key = "{$locale}:{$dayType}:{$timeType}:{$timezone}:{$format}";
+            if (!isset($cache[$key])) {
+                // Setting up the IntlDateFormatter is pretty expensive, so
+                // cache it since there aren't many variations of the
+                // arguments passed to the constructor
+                $cache[$key] = $formatter = new IntlDateFormatter(
+                    $locale,
+                    $dayType,
+                    $timeType,
+                    $timezone,
+                    IntlDateFormatter::GREGORIAN,
+                    $format ?: null
+                );
+                if ($cfg->isForce24HourTime()) {
+                    $format = str_replace(array('a', 'h'), array('', 'H'),
+                        $formatter->getPattern());
+                    $formatter->setPattern($format);
+                }
+            }
+            else {
+                $formatter = $cache[$key];
+            }
+            return $formatter->format($timestamp);
         }
+        // Fallback using strftime
+        static $user_timezone;
+        if (!isset($user_timezone))
+            $user_timezone = new DateTimeZone($cfg->getTimezone() ?: date_default_timezone_get());
 
-        // Fallback to using strftime which is not timezone aware
-        // Figure out timezone offset for given timestamp
-        $timestamp = $datetime->format('U');
-        $time = DateTime::createFromFormat('U', $timestamp, new DateTimeZone('UTC'));
-        $timestamp += $timezone->getOffset($time);
-        // Change format to strftime format otherwise us a fallback format
-        $format = self::getStrftimeFormat($format) ?: $options['strftime']
-            ?:  '%x %X';
-        return strftime($format, $timestamp);
+        $format = self::getStrftimeFormat($format);
+        // Properly convert to user local time
+        if (!($time = DateTime::createFromFormat('U', $timestamp, new DateTimeZone('UTC'))))
+           return '';
+
+        $offset = $user_timezone->getOffset($time);
+        $timestamp = $time->getTimestamp() + $offset;
+        return strftime($format ?: $strftimeFallback, $timestamp);
     }
 
-    // Normalize ambiguous timezones
-    function timezone($tz, $default=false) {
-
-        // Translate ambiguous 'GMT' timezone
-        if ($tz == 'GMT')
-           return 'Europe/London';
-
-        if (!$tz || !strcmp($tz, '+00:00'))
-            $tz = 'UTC';
-
-        if (is_numeric($tz))
-            $tz = timezone_name_from_abbr('', $tz, false);
-        // Forbid timezone abbreviations like 'CDT'
-        elseif ($tz !== 'UTC' && strpos($tz, '/') === false) {
-            // Attempt to lookup based on the abbreviation
-            if (!($tz = timezone_name_from_abbr($tz)))
-                // Abbreviation doesn't point to anything valid
-                return $default;
-        }
-
-        // SYSTEM does not describe a time zone, ensure we have a valid zone
-        // by attempting to create an instance of DateTimeZone()
-        try {
-            $timezone = new DateTimeZone($tz);
-            return $timezone->getName();
-        } catch(Exception $ex) {
-            return $default;
-        }
-
-        return $tz;
-    }
-
-    function parseDatetime($date, $locale=null, $format=false) {
+    function parseDate($date, $format=false) {
         global $cfg;
 
-        if (!$date)
-            return null;
-
-        // Timestamp format?
-        if (is_numeric($date))
-            return DateTime::createFromFormat('U', $date);
-
-        $datetime = null;
-        try {
-            $datetime = new DateTime($date);
-            $tz = $datetime->getTimezone()->getName();
-            if ($tz && $tz[0] == '+' || $tz[0] == '-')
-                $tz = (int) $datetime->format('Z');
-            $timezone =  new DateTimeZone(Format::timezone($tz) ?: 'UTC');
-            $datetime->setTimezone($timezone);
-        } catch (Exception $ex) {
-            // Fallback using strtotime
-            if (($time=strtotime($date)))
-                $datetime = DateTime::createFromFormat('U', $time);
-
+        if (class_exists('IntlDateFormatter')) {
+            $formatter = new IntlDateFormatter(
+                Internationalization::getCurrentLocale(),
+                null,
+                null,
+                null,
+                IntlDateFormatter::GREGORIAN,
+                $format ?: null
+            );
+            if ($cfg->isForce24HourTime()) {
+                $format = str_replace(array('a', 'h'), array('', 'H'),
+                    $formatter->getPattern());
+                $formatter->setPattern($format);
+            }
+            return $formatter->parse($date);
         }
-
-        return $datetime;
+        // Fallback using strtotime
+        return strtotime($date);
     }
 
     function time($timestamp, $fromDb=true, $format=false, $timezone=false, $user=false) {
@@ -940,45 +886,23 @@ else {
 
 class FormattedLocalDate
 implements TemplateVariable {
-
     var $date;
     var $timezone;
-    var $datetime;
     var $fromdb;
-    var $format;
 
-    function __construct($date,  $options=array()) {
-
-        // Date to be formatted
-        $this->datetime = Format::parseDateTime($date);
-        $this->date = $this->datetime->getTimestamp();
-        // Desired timezone
-        if (isset($options['timezone']))
-            $this->timezone = $options['timezone'];
-        else
-            $this->timezone = false;
-        // User
-        if (isset($options['user']))
-            $this->user = $options['user'];
-        else
-            $this->user = false;
-
-        // DB date or nah?
-        if (isset($options['fromdb']))
-            $this->fromdb = $options['fromdb'];
-        else
-            $this->fromdb = true;
-        // Desired format
-        if (isset($options['format']) && $options['format'])
-            $this->format = $options['format'];
-    }
-
-    function getDateTime() {
-        return $this->datetime;
+    function __construct($date, $timezone=false, $user=false, $fromdb=true) {
+        $this->date = $date;
+        $this->timezone = $timezone;
+        $this->user = $user;
+        $this->fromdb = $fromdb;
     }
 
     function asVar() {
-        return $this->getVar($this->format ?: 'long');
+        return $this->getVar('long');
+    }
+
+    function __toString() {
+        return $this->asVar();
     }
 
     function getVar($what) {
@@ -994,10 +918,6 @@ implements TemplateVariable {
         case 'full':
             return Format::daydatetime($this->date, $this->fromdb, $this->timezone, $this->user);
         }
-    }
-
-    function __toString() {
-        return $this->asVar() ?: '';
     }
 
     static function getVarScope() {
@@ -1018,28 +938,7 @@ extends FormattedLocalDate {
 
     function __toString() {
         global $cfg;
-
-        $timezone = new DatetimeZone($this->timezone ?:
-                $cfg->getTimezone());
-        $options = array(
-                'timezone'  => $timezone->getName(),
-                'fromdb'    => $this->fromdb,
-                'format'    => $this->format
-                );
-
-        $val = (string) new FormattedLocalDate($this->date, $options);
-        if ($this->timezone && $this->format == 'long') {
-            try {
-                $this->datetime->setTimezone($timezone);
-                $val = sprintf('%s %s',
-                        $val, $this->datetime->format('T'));
-
-            } catch(Exception $ex) {
-                // ignore
-            }
-        }
-
-        return $val;
+        return (string) new FormattedLocalDate($this->date, $cfg->getTimezone(), false, $this->fromdb);
     }
 
     function getVar($what, $context=null) {
@@ -1052,19 +951,13 @@ extends FormattedLocalDate {
         case 'user':
             // Fetch $recipient from the context and find that user's time zone
             if ($context && ($recipient = $context->getObj('recipient'))) {
-                $options = array(
-                        'timezone' => $recipient->getTimezone() ?: $cfg->getDefaultTimezone(),
-                        'user' => $recipient
-                        );
-                return new FormattedLocalDate($this->date, $options);
+                $tz = $recipient->getTimezone() ?: $cfg->getDefaultTimezone();
+                return new FormattedLocalDate($this->date, $tz, $recipient);
             }
             // Don't resolve the variable until correspondance is sent out
             return false;
         case 'system':
-            return new FormattedLocalDate($this->date, array(
-                        'timezone' => $cfg->getDefaultTimezone()
-                        )
-                    );
+            return new FormattedLocalDate($this->date, $cfg->getDefaultTimezone());
         }
     }
 

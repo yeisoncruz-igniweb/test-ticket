@@ -388,11 +388,6 @@ implements TemplateVariable {
                 ->filter(array('dept_id' => $id))
                 ->update(array('dept_id' => $cfg->getDefaultDeptId()));
 
-            // Move tasks
-            Task::objects()
-                ->filter(array('dept_id' => $id))
-                ->update(array('dept_id' => $cfg->getDefaultDeptId()));
-
             //Move Dept members: This should never happen..since delete should be issued only to empty Depts...but check it anyways
             Staff::objects()
                 ->filter(array('dept_id' => $id))
@@ -604,8 +599,7 @@ implements TemplateVariable {
 
         $id = $this->id;
         if ($id && $id != $vars['id'])
-            $errors['err']=__('Missing or invalid Dept ID.')
-                .' '.__('Internal error occurred');
+            $errors['err']=__('Missing or invalid Dept ID (internal error).');
 
         if (!$vars['name']) {
             $errors['name']=__('Name required');

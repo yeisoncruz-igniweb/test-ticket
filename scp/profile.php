@@ -20,8 +20,7 @@ require_once(INCLUDE_DIR.'class.export.php');       // For paper sizes
 $msg='';
 $staff=Staff::lookup($thisstaff->getId());
 if($_POST && $_POST['id']!=$thisstaff->getId()) { //Check dummy ID used on the form.
- $errors['err']=__('Action Denied.')
-        .' '.__('Internal error occurred');
+ $errors['err']=__('Internal Error. Action Denied');
 } elseif(!$errors && $_POST) { //Handle post
 
     if(!$staff)

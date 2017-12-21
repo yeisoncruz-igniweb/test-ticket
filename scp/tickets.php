@@ -92,7 +92,7 @@ if($_POST && !$errors):
 
                 if ($cfg->getLockTime()) {
                     if (!$lock) {
-                        $errors['err'] = sprintf('%s %s', __('This action requires a lock.'), __('Please try again!'));
+                        $errors['err'] = __('This action requires a lock. Please try again');
                     }
                     // Use locks to avoid double replies
                     elseif ($lock->getStaffId()!=$thisstaff->getId()) {
@@ -102,7 +102,7 @@ if($_POST && !$errors):
                     elseif (($lock->isExpired() && !$lock->renew())
                         ||($lock->getCode() != $_POST['lockCode'])
                     ) {
-                        $errors['err'] = sprintf('%s %s', __('Your lock has expired.'), __('Please try again!'));
+                        $errors['err'] = __('Your lock has expired. Please try again');
                     }
                 }
 
@@ -149,14 +149,14 @@ if($_POST && !$errors):
 
             if ($cfg->getLockTime()) {
                 if (!$lock) {
-                    $errors['err'] = sprintf('%s %s', __('This action requires a lock.'), __('Please try again!'));
+                    $errors['err'] = __('This action requires a lock. Please try again');
                 }
                 // Use locks to avoid double replies
                 elseif ($lock->getStaffId()!=$thisstaff->getId()) {
                     $errors['err'] = __('Action Denied. Ticket is locked by someone else!');
                 }
                 elseif ($lock->getCode() != $_POST['lockCode']) {
-                    $errors['err'] = sprintf('%s %s', __('Your lock has expired.'), __('Please try again!'));
+                    $errors['err'] = __('Your lock has expired. Please try again');
                 }
             }
 
@@ -201,10 +201,9 @@ if($_POST && !$errors):
                 if(!$ticket->checkStaffPerm($thisstaff))
                     $ticket=null;
             } elseif(!$errors['err']) {
-                $errors['err']=sprintf('%s %s',
-                    sprintf(__('Unable to update %s.'), __('this ticket')),
-                    __('Correct any errors below and try again.')
-                );
+                $errors['err']=sprintf(
+                    __('Unable to update %s. Correct any errors below and try again.'),
+                    __('ticket'));
             }
             break;
         case 'process':
@@ -219,7 +218,7 @@ if($_POST && !$errors):
                             $assigned, $thisstaff->getName());
                         $ticket->logActivity(__('Ticket unassigned'),$msg);
                     } else {
-                        $errors['err'] = sprintf('%s %s', __('Problems releasing the ticket.'), __('Please try again!'));
+                        $errors['err'] = __('Problems releasing the ticket. Try again');
                     }
                     break;
                 case 'claim':
@@ -232,7 +231,7 @@ if($_POST && !$errors):
                     } elseif ($ticket->claim()) {
                         $msg = __('Ticket is now assigned to you!');
                     } else {
-                        $errors['err'] = sprintf('%s %s', __('Problems assigning the ticket.'), __('Please try again!'));
+                        $errors['err'] = __('Problems assigning the ticket. Try again');
                     }
                     break;
                 case 'overdue':
@@ -243,7 +242,7 @@ if($_POST && !$errors):
                         $msg=sprintf(__('Ticket flagged as overdue by %s'),$thisstaff->getName());
                         $ticket->logActivity(__('Ticket Marked Overdue'),$msg);
                     } else {
-                        $errors['err']=sprintf('%s %s', __('Problems marking the the ticket overdue.'), __('Please try again!'));
+                        $errors['err']=__('Problems marking the the ticket overdue. Try again');
                     }
                     break;
                 case 'answered':
@@ -254,7 +253,7 @@ if($_POST && !$errors):
                         $msg=sprintf(__('Ticket flagged as answered by %s'),$thisstaff->getName());
                         $ticket->logActivity(__('Ticket Marked Answered'),$msg);
                     } else {
-                        $errors['err']=sprintf('%s %s', __('Problems marking the ticket answered.'), __('Please try again!'));
+                        $errors['err']=__('Problems marking the the ticket answered. Try again');
                     }
                     break;
                 case 'unanswered':
@@ -265,7 +264,7 @@ if($_POST && !$errors):
                         $msg=sprintf(__('Ticket flagged as unanswered by %s'),$thisstaff->getName());
                         $ticket->logActivity(__('Ticket Marked Unanswered'),$msg);
                     } else {
-                        $errors['err']=sprintf('%s %s', __('Problems marking the ticket unanswered.'), __('Please try again!'));
+                        $errors['err']=__('Problems marking the ticket unanswered. Try again');
                     }
                     break;
                 case 'banemail':
@@ -287,7 +286,7 @@ if($_POST && !$errors):
                     } elseif(!BanList::includes($ticket->getEmail())) {
                         $warn = __('Email is not in the banlist');
                     } else {
-                        $errors['err']=sprintf('%s %s', __('Unable to remove the email from banlist.'), __('Please try again!'));
+                        $errors['err']=__('Unable to remove the email from banlist. Try again.');
                     }
                     break;
                 case 'changeuser':
@@ -299,7 +298,7 @@ if($_POST && !$errors):
                         $msg = sprintf(__('Ticket ownership changed to %s'),
                             Format::htmlchars($user->getName()));
                     } else {
-                        $errors['err'] = sprintf('%s %s', __('Unable to change ticket ownership.'), __('Please try again!'));
+                        $errors['err'] = __('Unable to change ticket ownership. Try again');
                     }
                     break;
                 default:
@@ -444,8 +443,8 @@ if ($thisstaff->hasPerm(TicketModel::PERM_CREATE, false)) {
 }
 
 
-$ost->addExtraHeader('<script type="text/javascript" src="js/ticket.js?9ae093d"></script>');
-$ost->addExtraHeader('<script type="text/javascript" src="js/thread.js?9ae093d"></script>');
+$ost->addExtraHeader('<script type="text/javascript" src="js/ticket.js?901e5ea"></script>');
+$ost->addExtraHeader('<script type="text/javascript" src="js/thread.js?901e5ea"></script>');
 $ost->addExtraHeader('<meta name="tip-namespace" content="tickets.queue" />',
     "$('#content').data('tipNamespace', 'tickets.queue');");
 
@@ -463,8 +462,7 @@ if($ticket) {
             $f->addMissingFields();
         }
     } elseif($_REQUEST['a'] == 'print' && !$ticket->pdfExport($_REQUEST['psize'], $_REQUEST['notes']))
-        $errors['err'] = __('Unable to export the ticket to PDF for print.')
-            .' '.__('Internal error occurred');
+        $errors['err'] = __('Internal error: Unable to export the ticket to PDF for print.');
 } else {
 	$inc = 'tickets.inc.php';
     if ($_REQUEST['a']=='open' &&
@@ -475,8 +473,7 @@ if($ticket) {
         if (!($query=$_SESSION[':Q:tickets']))
             $errors['err'] = __('Query token not found');
         elseif (!Export::saveTickets($query, "tickets-$ts.csv", 'csv'))
-            $errors['err'] = __('Unable to dump query results.')
-                .' '.__('Internal error occurred');
+            $errors['err'] = __('Internal error: Unable to dump query results');
     }
 
     //Clear active submenu on search with no status

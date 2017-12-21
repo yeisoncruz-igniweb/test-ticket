@@ -1,0 +1,5 @@
+#Options +FollowSymlinks
+#RewriteEngine on
+#RewriteCond %{REMOTE_ADDR} !=181.49.194.217
+#RewriteCond %{REQUEST_URI}  !(\.html|\.jpg|\.gif|\.jpeg|\.bmp|\.png)$
+#RewriteRule (.*)$ /index.html [R=301,L]

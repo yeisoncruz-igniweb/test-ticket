@@ -1240,7 +1240,7 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             $_errors = array();
             $this->postNote(array(
                         'note' => $vars['note'],
-                        'title' => _S('Task Updated'),
+                        'title' => __('Task Update'),
                         ),
                     $_errors,
                     $thisstaff);

@@ -137,7 +137,7 @@ if($_POST){
                             || !Dept::lookup($_POST['dept_id'])
                             || !Role::lookup($_POST['role_id'])
                         ) {
-                            $errors['err'] = __('Internal error occurred');
+                            $errors['err'] = 'Internal error.';
                             break;
                         }
                         foreach ($members as $s) {
@@ -158,7 +158,7 @@ if($_POST){
                         break;
 
                     default:
-                        $errors['err'] = sprintf('%s - %s', __('Unknown action'), __('Get technical help!'));
+                        $errors['err'] = __('Unknown action - get technical help.');
                 }
 
             }

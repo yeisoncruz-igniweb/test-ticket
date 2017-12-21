@@ -21,8 +21,7 @@ class DynamicFormsAjaxAPI extends AjaxController {
         if ($_GET || isset($_SESSION[':form-data'])) {
             if (!is_array($_SESSION[':form-data']))
                 $_SESSION[':form-data'] = array();
-            $_SESSION[':form-data'] = array_merge($_SESSION[':form-data'],
-                    Format::htmlchars($_GET));
+            $_SESSION[':form-data'] = array_merge($_SESSION[':form-data'], $_GET);
         }
 
         foreach ($topic->getForms() as $form) {
@@ -173,7 +172,7 @@ class DynamicFormsAjaxAPI extends AjaxController {
                 $item->update([
                     'name' =>   $basic['name'],
                     'value' =>  $basic['value'],
-                    'abbrev' =>  $basic['extra'],
+                    'extra' =>  $basic['extra'],
                 ]);
             }
         }

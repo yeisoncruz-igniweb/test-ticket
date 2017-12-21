@@ -1,0 +1,24 @@
+[03-Mar-2016 10:25:57 UTC] PHP Warning:  imap_close() expects parameter 1 to be resource, boolean given in /home/caymanwireless/ticket/include/class.mailfetch.php on line 147
+[16-Nov-2016 11:45:37 UTC] PHP Warning:  stream_socket_client(): unable to connect to smtp.office365.com:587 (Connection timed out) in /home/caymanwireless/ticket/include/pear/Net/Socket.php on line 166
+[09-Dec-2016 08:11:28 UTC] PHP Warning:  stream_socket_client(): unable to connect to 132.245.40.2:587 (Connection timed out) in /home/caymanwireless/ticket/include/pear/Net/Socket.php on line 166
+[03-Feb-2017 21:54:05 UTC] PHP Fatal error:  Uncaught exception 'InconsistentModelException' with message 'Unable to prepare query: MySQL server has gone away SELECT A1.* FROM `ost_email` A1 WHERE A1.`email_id` = '0'' in /home/caymanwireless/ticket/include/class.orm.php:3134
+Stack trace:
+#0 /home/caymanwireless/ticket/include/class.orm.php(3180): MySqlExecutor->execute()
+#1 /home/caymanwireless/ticket/include/class.orm.php(1771): MySqlExecutor->getArray()
+#2 /home/caymanwireless/ticket/include/class.orm.php(1815): ModelInstanceManager->{closure}()
+#3 /home/caymanwireless/ticket/include/class.orm.php(1794): CallbackSimpleIterator->next()
+#4 /home/caymanwireless/ticket/include/class.orm.php(1803): CallbackSimpleIterator->rewind()
+#5 /home/caymanwireless/ticket/include/class.orm.php(1463): CallbackSimpleIterator->valid()
+#6 /home/caymanwireless/ticket/include/class.orm.php(1480): CachedResultSet->fillTo(9223372036854775807)
+#7 /home/caymanwireless/ticket/include/class.orm.php(1149): CachedResultSet->asArray()
+#8 /home/caymanwireless/ticket/include/class.or in /home/caymanwireless/ticket/include/class.orm.php on line 3134
+[24-Mar-2017 07:30:01 UTC] PHP Fatal error:  Out of memory (allocated 9961472) (tried to allocate 3072 bytes) in /home/caymanwireless/ticket/include/class.error.php on line 24
+[24-Mar-2017 18:10:02 America/Chicago] PHP Fatal error:  Out of memory (allocated 262144) (tried to allocate 12288 bytes) in /home/caymanwireless/ticket/bootstrap.php on line 79
+[24-Mar-2017 23:12:02 UTC] PHP Fatal error:  Out of memory (allocated 4718592) (tried to allocate 12288 bytes) in /home/caymanwireless/ticket/include/class.dynamic_forms.php on line 1842
+[24-Mar-2017 23:20:01 UTC] PHP Fatal error:  Out of memory (allocated 2097152) (tried to allocate 3072 bytes) in /home/caymanwireless/ticket/include/class.translation.php on line 887
+[24-Mar-2017 23:44:03 UTC] PHP Fatal error:  Out of memory (allocated 2621440) (tried to allocate 49152 bytes) in /home/caymanwireless/ticket/include/class.organization.php on line 428
+[24-Mar-2017 20:16:01 America/Chicago] PHP Fatal error:  Out of memory (allocated 524288) (tried to allocate 12288 bytes) in /home/caymanwireless/ticket/include/class.plugin.php on line 182
+[24-Mar-2017 20:34:02 America/Chicago] PHP Fatal error:  Out of memory (allocated 1048576) (tried to allocate 3072 bytes) in /home/caymanwireless/ticket/include/class.orm.php on line 209
+[25-Mar-2017 07:14:02 UTC] PHP Fatal error:  Out of memory (allocated 3670016) (tried to allocate 3072 bytes) in /home/caymanwireless/ticket/include/class.forms.php on line 2852
+[11-Apr-2017 09:17:00 UTC] PHP Warning:  imap_close() expects parameter 1 to be resource, boolean given in /home/caymanwireless/ticket/include/class.mailfetch.php on line 148
+[11-Apr-2017 10:30:17 UTC] PHP Warning:  imap_close() expects parameter 1 to be resource, boolean given in /home/caymanwireless/ticket/include/class.mailfetch.php on line 148

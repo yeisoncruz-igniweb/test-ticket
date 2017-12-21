@@ -123,7 +123,7 @@ JS
         $old = $this->entry;
         $new = ThreadEntryBody::fromFormattedText($_POST['body'], $old->format);
 
-        if ($new->getClean() == $old->getBody())
+        if ($new->getClean() == $old->body)
             // No update was performed
             return $old;
 
@@ -165,9 +165,7 @@ JS
         }
 
         // Move the attachments to the new entry
-        $old->attachments->filter(array(
-            'inline' => false,
-        ))->update(array(
+        $old->attachments->update(array(
             'object_id' => $entry->id
         ));
 

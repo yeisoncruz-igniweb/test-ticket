@@ -2601,7 +2601,7 @@ class MySqlCompiler extends SqlCompiler {
     }
 
     function quote($what) {
-        return sprintf("`%s`", str_replace("`", "``", $what));
+        return "`$what`";
     }
 
     /**

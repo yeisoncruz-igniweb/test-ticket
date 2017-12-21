@@ -33,7 +33,7 @@ body {
 }
 
 #brickwall {
-    background-image: url(../logo.php?backdrop);
+    background-image: url('https://www.caymanwireless.com/themes/theme856/img/7419872_l.jpg');
     -webkit-background-size: cover;
        -moz-background-size: cover;
          -o-background-size: cover;
